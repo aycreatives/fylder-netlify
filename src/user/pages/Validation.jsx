@@ -4,11 +4,7 @@ import Swal from "sweetalert2";
 import { config } from "../../config/config";
 import axios from "axios";
 import CryptoJS from "crypto-js";
-
-const VALIDATION_PRICES = {
-  "No Record Found": 10,
-  "Modification Validation": 2500,
-};
+import { toast } from "react-toastify";
 
 function Validation() {
   const [form] = Form.useForm();
@@ -20,6 +16,11 @@ function Validation() {
   const [banksLoading, setBanksLoading] = useState(false);
   const [validationPrice, setValidationPrice] = useState(0);
   const [selectedValidationType, setSelectedValidationType] = useState(null);
+  const [priceLoading, setPriceLoading] = useState(false);
+  const [validationPrices, setValidationPrices] = useState({
+    "No Record Found": 1000,
+    "Modification Validation": 2500,
+  });
 
   const SECRET_KEY = import.meta.env.VITE_APP_SECRET_KEY;
 
@@ -54,8 +55,51 @@ function Validation() {
     }
   }, [userPhone, form]);
 
+  // Fetch validation prices from API
+  useEffect(() => {
+    const fetchPrices = async () => {
+      setPriceLoading(true);
+      try {
+        const response = await axios.get(
+          `${config.apiBaseUrl}${config.endpoints.currentapipricing}`,
+          { withCredentials: true }
+        );
+        console.log("API Prices Response:", response.data);
+
+        // Find validation pricing
+        const validationPricingData = Array.isArray(response.data)
+          ? response.data.find((item) => item.key === "validation")
+          : response.data;
+
+        const validationPricing =
+          validationPricingData?.key === "validation"
+            ? validationPricingData
+            : null;
+
+        if (validationPricing && validationPricing.prices) {
+          // Update validationPrices with agent price for "No Record Found"
+          setValidationPrices((prev) => ({
+            ...prev,
+            "No Record Found": validationPricing.prices.agent,
+          }));
+          console.log(
+            "Validation agent price set to:",
+            validationPricing.prices.agent
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching API prices:", error);
+        toast.error("Failed to fetch current prices");
+      } finally {
+        setPriceLoading(false);
+      }
+    };
+
+    fetchPrices();
+  }, []);
+
   const onFinish = async (values) => {
-    const price = VALIDATION_PRICES[values.validationType] || 0;
+    const price = validationPrices[values.validationType] || 0;
 
     // Show confirmation dialog first
     const result = await Swal.fire({
@@ -121,7 +165,7 @@ function Validation() {
 
   const handleValidationTypeChange = (value) => {
     setSelectedValidationType(value);
-    const price = VALIDATION_PRICES[value] || 0;
+    const price = validationPrices[value] || 0;
     setValidationPrice(price);
   };
 
