@@ -589,32 +589,33 @@ function Dashboard() {
 
         <div className="flex-1/2 rounded-lg bg-white shadow-md hover:shadow-lg ring-2 ring-amber-50/2 w-full p-6 flex flex-col justify-between">
           <div>
-            <div className="flex justify-between items-start">
+            <div className="flex md:flex-row flex-row justify-between items-start">
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                 <FaCube className="text-2xl text-purple-600" />
               </div>
+              <div className="-mt-[14px]">
+                <p className="text-sky-500 text-sm mt-4">Total Transactions</p>
+                <p className="text-3xl font-bold text-gray-800 ">
+                  {loadingVerifications ? (
+                    <span className="text-sky-400 text-lg">Loading...</span>
+                  ) : (
+                    <span>{verificationCount}</span>
+                  )}
+                </p>
+              </div>
             </div>
-            <p className="text-gray-500 text-sm mt-4">Total Transactions</p>
-            <p className="text-3xl font-bold text-gray-800 mt-1">
-              {loadingVerifications ? (
-                <span className="text-amber-400 text-lg">Loading...</span>
-              ) : (
-                <span>{verificationCount}</span>
-              )}
-            </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+          <div className="flex flex-row sm:flex-row gap-3 mt-4">
             <Link
               to="/dashboard/all-history"
               className="flex-1 text-center px-2 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm font-medium"
             >
-              View Verification History
+              View History
             </Link>
             <Link
               to="/dashboard/fundinghistory"
               className="flex-1 text-center px-2 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors text-sm font-medium flex items-center justify-center gap-2"
             >
-              <CiWallet />
               View Funding
             </Link>
           </div>
